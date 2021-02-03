@@ -118,6 +118,19 @@ struct Cell {
 		parse_as_double();
 	}
 
+	Cell(const char * strptr , size_t length_of_string) {
+		char * strbuf = new char[length_of_string + 1];
+		strncpy(strbuf //char *dest
+				,strptr //const char *src
+				,length_of_string  ////size_t n);
+		);
+		str = std::string(strbuf);
+		delete(strbuf);
+		assert(is_cell_proper());
+		parse_as_int();
+		parse_as_double();
+	}
+
 };
 
 
@@ -197,6 +210,8 @@ struct Table {
 	}
 
 	Table(const LinesVector & linevec);
+
+	void parse_all_cells(void); // TODO
 };
 
 
@@ -204,32 +219,23 @@ std::vector< Cell > vector_of_cells_from_line_string(std::string line)
 {
 	std::vector< Cell > vec_cells;
 	const char * strptr  = line.c_str();
-	const char * const strptr_end  = line.c_str() + line.size() - 2;
-	const char * strptr_nexttab = strchr(strptr , DELIMITER_ROW) ;
+	const char * const strptr_end  = line.c_str() + line.size() - 0;
+	const char * strptr_next_delimiter = strchrnul(strptr , DELIMITER_ROW) ;
 	while(
-			strptr_nexttab != 0
+			strptr_next_delimiter != 0
 			&&
 			strptr < strptr_end
 			&&
 			strptr != 0
 			) {
-		const size_t length_of_string = ( strptr_nexttab - strptr);
+		const size_t length_of_string = ( strptr_next_delimiter - strptr);
+
+		vec_cells.emplace_back(Cell(strptr , length_of_string));
 
 
-		char * strbuf = new char[length_of_string + 1];
+		strptr = strptr_next_delimiter + 1;
+		strptr_next_delimiter = strchrnul(strptr , DELIMITER_ROW) ;
 
-		strncpy(strbuf //char *dest
-				,strptr //const char *src
-				,length_of_string  ////size_t n);
-		);
-		//printf( "%zd %s \t %s\n" , length_of_string , strbuf , strptr );
-
-		vec_cells.emplace_back(Cell(strbuf));
-
-		delete strbuf;
-
-		strptr = strptr_nexttab + 1;
-		strptr_nexttab = strchr(strptr , DELIMITER_ROW) ;
 	}
 	return vec_cells;
 }
