@@ -17,33 +17,34 @@
 
 int main(int argc , char *argv[])
 {
-	int row_start = 0;
-	int row_end = 0;
-	if( argc == 3 ) {
-		row_start = strtol(argv[1],0,0);
-		row_end   = strtol(argv[2],0,0);
+	std::vector< const char * > vector_filenames;
+
+	int opt;
+	while((opt = getopt(argc,argv, "")) != -1) {
 	}
 
-
-
-
-	LinesVector larr = lines_from_file(stdin);
-	printf( "Lines: %zd\n" , larr.size() );
-
-	Table t = Table(larr);
-	//t.fprint(stdout);
-
-
-	if(row_start > 0 && row_end > 0) {
-		t.fprint_row(stdout,0);
-		assert( row_start <= row_end );
-		assert( (size_t)row_start  < t.table.size() );
-		assert( (size_t)row_end    < t.table.size() );
-		for( int w = row_start; w <= row_end ; ++w ) {
-			t.fprint_row(stdout,w);
+	// getopt reorders the argv, so that all the non-option arguments are at the end, after last option
+	if( optind < argc ) {
+		for( int i = optind; i < argc; ++i ) {
+			vector_filenames.push_back(argv[i] );
 		}
-	} else {
-		t.fprint(stdout);
 	}
+
+
+
+	std::vector< Table > vector_table;
+
+	for( const char * s : vector_filenames )  {
+		FILE * f = fopen(s,"r");
+		if( f == 0 ) {
+			fprintf(stderr,"failed to open file for reading: %s" , s);
+		}
+		vector_table.emplace_back(table_from_file(f));
+		fclose(f);
+
+		printf( "%s rows: %zd\n" , s , vector_table.back().table.size());
+		vector_table.back().fprint(stdout);
+	}
+
 
 }

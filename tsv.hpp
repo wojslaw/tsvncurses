@@ -75,4 +75,5 @@ struct Table {
 };
 
 
+Table table_from_file(FILE * f);
 

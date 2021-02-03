@@ -34,7 +34,6 @@ lines_from_file(FILE * f)
 		lineptr[retval-1] = '\0';
 		lines_array.emplace_back(std::string(lineptr));
 		free(lineptr);
-		//printf( "%ld %ld \"%s\"\n" , retval , n , lineptr );
 	}
 
 }
@@ -193,6 +192,19 @@ Table::Table(
 
 	printf( "Table rows: %zd\n" , count_rows  );
 }
+
+
+
+
+Table table_from_file(
+		FILE * f
+		)
+{
+	LinesVector linevec = lines_from_file(f);
+	return Table(linevec);
+}
+
+
 
 
 
