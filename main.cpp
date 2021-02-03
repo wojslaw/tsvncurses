@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <getopt.h>
+
 #define DELIMITER_ROW '\t'
 
 
@@ -66,6 +68,12 @@ void lines_fprint_to_file(FILE * f , const LinesVector larr)
 
 struct Cell {
 	std::string str;
+	bool is_str(void) const {
+		return (str.size() > 0);
+	}
+	const char * as_str(void) const {
+		return str.c_str();
+	}
 	bool is_int = false;
 	int  as_int = 0;
 	bool   is_double = false;
@@ -199,7 +207,7 @@ struct Table {
 		return table.at(row).at(col);
 	}
 
-	void fprint(FILE * f) {
+	void fprint(FILE * f) const {
 		for( const auto & row : table ) {
 			for( const auto & cell : row ) {
 				fputs(cell.str.c_str() , f);
@@ -212,6 +220,8 @@ struct Table {
 	Table(const LinesVector & linevec);
 
 	void parse_all_cells(void); // TODO
+
+	void fprint_row(FILE * , int r) const;
 };
 
 
@@ -256,6 +266,17 @@ Table::Table(const LinesVector & linevec)
 
 
 
+void
+Table::fprint_row (
+		FILE * f
+		,int r
+) const {
+	for( auto const & cell : table.at(r) ) {
+		fputs(cell.as_str() , f);
+		fputc(DELIMITER_ROW,f);
+	}
+	fputc('\n',f);
+}
 
 
 
@@ -267,11 +288,39 @@ Table::Table(const LinesVector & linevec)
 
 
 
-int main(/*int argc , char *argv[]*/)
+
+
+
+
+int main(int argc , char *argv[])
 {
+	int row_start = 0;
+	int row_end = 0;
+	if( argc == 3 ) {
+		row_start = strtol(argv[1],0,0);
+		row_end   = strtol(argv[2],0,0);
+	}
+
+
+
+
 	LinesVector larr = lines_from_file(stdin);
 	printf( "Lines: %zd\n" , larr.size() );
 
 	Table t = Table(larr);
-	t.fprint(stdout);
+	//t.fprint(stdout);
+
+
+	if(row_start > 0 && row_end > 0) {
+		t.fprint_row(stdout,0);
+		assert( row_start <= row_end );
+		assert( (size_t)row_start  < t.table.size() );
+		assert( (size_t)row_end    < t.table.size() );
+		for( int w = row_start; w <= row_end ; ++w ) {
+			t.fprint_row(stdout,w);
+		}
+	} else {
+		t.fprint(stdout);
+	}
+
 }
