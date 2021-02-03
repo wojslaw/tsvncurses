@@ -10,7 +10,8 @@
 
 #include <getopt.h>
 
-#define DELIMITER_ROW '\t'
+#define DELIMITER_CELL '\t'
+#define DELIMITER_ROW  '\n'
 
 
 typedef std::vector< std::string > LinesVector ;
@@ -56,7 +57,7 @@ void lines_fprint_to_file(FILE * f , const LinesVector larr)
 {
 	for( const std::string & str : larr ) {
 		fputs( str.c_str() , f );
-		fputc('\n',f);
+		fputc(DELIMITER_ROW,f);
 	}
 }
 
@@ -152,10 +153,10 @@ const
 	// maybe it would make sense to only allow printable characters?
 	// or maybe not: if I checked for isprint(), then UTF-8 stuff would signal an error
 	for( const char c : str  ) {
-		if( c == DELIMITER_ROW ) {
+		if( c == DELIMITER_CELL ) {
 			return false;
 		}
-		if( c == '\n' ) {
+		if( c == DELIMITER_ROW ) {
 			return false;
 		}
 		if( c == '\0' ) {
@@ -211,9 +212,9 @@ struct Table {
 		for( const auto & row : table ) {
 			for( const auto & cell : row ) {
 				fputs(cell.str.c_str() , f);
-				fputc(DELIMITER_ROW , f);
+				fputc(DELIMITER_CELL , f);
 			}
-			fputc('\n' , f);
+			fputc(DELIMITER_ROW , f);
 		}
 	}
 
@@ -230,7 +231,7 @@ std::vector< Cell > vector_of_cells_from_line_string(std::string line)
 	std::vector< Cell > vec_cells;
 	const char * strptr  = line.c_str();
 	const char * const strptr_end  = line.c_str() + line.size() - 0;
-	const char * strptr_next_delimiter = strchrnul(strptr , DELIMITER_ROW) ;
+	const char * strptr_next_delimiter = strchrnul(strptr , DELIMITER_CELL) ;
 	while(
 			strptr_next_delimiter != 0
 			&&
@@ -244,7 +245,7 @@ std::vector< Cell > vector_of_cells_from_line_string(std::string line)
 
 
 		strptr = strptr_next_delimiter + 1;
-		strptr_next_delimiter = strchrnul(strptr , DELIMITER_ROW) ;
+		strptr_next_delimiter = strchrnul(strptr , DELIMITER_CELL) ;
 
 	}
 	return vec_cells;
@@ -273,9 +274,9 @@ Table::fprint_row (
 ) const {
 	for( auto const & cell : table.at(r) ) {
 		fputs(cell.as_str() , f);
-		fputc(DELIMITER_ROW,f);
+		fputc(DELIMITER_CELL,f);
 	}
-	fputc('\n',f);
+	fputc(DELIMITER_ROW,f);
 }
 
 
