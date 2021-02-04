@@ -314,13 +314,11 @@ Cell::Cell(
 		const char * strptr , size_t length_of_string
 	)
 {
-	char * strbuf = new char[length_of_string + 1];
-	strncpy(strbuf //char *dest
+	str.resize(length_of_string);
+	strncpy(&str[0] //char *dest
 			,strptr //const char *src
 			,length_of_string  ////size_t n);
 	);
-	str = std::string(strbuf);
-	delete(strbuf);
 	assert(is_cell_proper());
 }
 
