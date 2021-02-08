@@ -148,9 +148,16 @@ print_table_rows(
 
 void
 edit_selected_cell(
-		Cell * cell
+		 WINDOW * w
+		,Cell * cell
 		)
 {
+	assert(w);
+	assert(cell);
+
+	wmove(w,0,0);
+	wprintw(w, "%s\n" , cell->str.c_str() );
+
 	// TODO
 }
 
@@ -198,6 +205,14 @@ edit_with_ncurses(Table table)
 	int display_y = 0;
 
 
+	WINDOW * window_edit = newwin(
+			4
+			,80
+			,table.table.size() + 8
+			,10
+			);
+
+
 
 	for( int ch = ERR;
 		ch != 3; // ^c
@@ -213,6 +228,7 @@ edit_with_ncurses(Table table)
 			case 'j': selection_row++; break;
 			case 'h': selection_col--; break;
 			case 'l': selection_col++; break;
+			case 's': do_edit_selected_cell = true; break;
 		}
 
 		ensure_greater_than( &selection_row , -1 );
@@ -222,9 +238,6 @@ edit_with_ncurses(Table table)
 		ensure_less_than( &selection_row , table.table.size() );
 		ensure_less_than( &selection_col , table.table.at(selection_row).size());
 
-		if( do_edit_selected_cell ) {
-			edit_selected_cell( &table.at( selection_row , selection_col ) );
-		}
 
 		int const row_start = 0;
 		int const row_end   = INT_MAX;
@@ -250,7 +263,16 @@ edit_with_ncurses(Table table)
 		}
 
 
+		if( do_edit_selected_cell ) {
+			assert(window_edit);
+			edit_selected_cell( window_edit ,  &table.at( selection_row , selection_col ) );
+		}
+
+
 		refresh();
+		wrefresh(window_edit);
+
+
 	}
 
 
