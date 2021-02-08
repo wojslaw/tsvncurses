@@ -1,6 +1,7 @@
 #include "tsv.hpp"
 #include <ncurses.h>
 
+#include <limits.h>
 
 
 

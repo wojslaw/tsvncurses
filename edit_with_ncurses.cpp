@@ -68,8 +68,8 @@ print_row(
 void
 print_table_rows(
 		 Table table
-		,int const start_row
-		,int const end_row
+		,int start_row
+		,int end_row
 		,int const selection_row
 		,int const selection_col
 		)
@@ -77,35 +77,95 @@ print_table_rows(
 	assert( end_row >= start_row );
 	erase();
 
+	int const width = 8;
 	int const table_rows = table.table.size();
 
 	attron(A_REVERSE);
 	print_row(
 			 0
 			,0
-			,8
+			,width
 			,-1
 			,-1
 			,table.table.at(0) );
 	attroff(A_REVERSE);
 
+	if(start_row >= table.table.size()) {
+		start_row = table.table.size();
+	}
+	if(end_row >= table.table.size()) {
+		end_row = table.table.size();
+	}
 
-	for( int i = 1 ; i < (end_row - start_row) ; ++i ) {
-		int const row = start_row + i;
-		if( row >= table_rows ) {
+
+
+	int y = 1;
+
+	for( int r = start_row ; r < end_row ; ++r ) {
+		++y;
+		std::vector<Cell> row = table.table.at(r);
+		if( r >= table_rows ) {
 			return;
 		}
-		
-		print_row (
-				 i
-				,0
-				,8
-				,true // (selection_row == row)
-				,selection_col
-				,table.table.at(row) );
+
+		for( int c = 0 ; c < row.size() ; ++c ) {
+			int const x = c*width;
+			bool const is_highlighted
+				= (
+				(r == selection_row)
+				&&
+				(c == selection_col) );
+			//printw( "\n(%d,%d)(%d,%d)\n" , r , c , y , x );
+			print_cell(
+					 y
+					,x
+					,width
+					,row.at(c)
+					,is_highlighted
+					);
+		}
+
+
 	}
 }
 
+
+
+
+void
+edit_selected_cell(
+		Cell * cell
+		)
+{
+	// TODO
+}
+
+
+void
+ensure_less_than(
+	 int * x
+	,int const v
+	)
+{
+	assert(x);
+	if( *x >= v ) {
+		*x = v-1;
+	}
+}
+
+
+
+void
+ensure_greater_than(
+	 int * x
+	,int const v
+	)
+{
+	assert(x);
+	if( *x <= v ) {
+		*x = v+1;
+	}
+}
 
 
 Table
@@ -114,28 +174,64 @@ edit_with_ncurses(Table table)
 	initscr();
 	noecho();
 	raw();
+	keypad(stdscr,true);
 
 
-	int selection_row  = 2;
-	int selection_col = 0;
+	int selection_row  = 1;
+	int selection_col = 1;
+	// TODO selecting and editing out of bounds
 
 	int display_y = 0;
 
-	print_table_rows(
-			table
-			,selection_row
-			,selection_row + 4
-			,selection_row
-			,selection_col
-			);
-
-	refresh();
 
 
-	printw("\n%s\n" , table.at(0,0).str.c_str()) ;
-	printw("\n%s\n" , table.at(2,0).str.c_str()) ;
+	for( int ch = ERR;
+		ch != 3; // ^c
+		ch = getch()
+	   ) {
 
-	getch();
+		bool do_edit_selected_cell = false;
+
+
+
+		switch(ch) {
+			case 'k': selection_row--; break;
+			case 'j': selection_row++; break;
+			case 'h': selection_col--; break;
+			case 'l': selection_col++; break;
+		}
+
+		ensure_greater_than( &selection_row , -1 );
+		ensure_greater_than( &selection_col , -1 );
+
+
+		ensure_less_than( &selection_row , table.table.size() );
+		ensure_less_than( &selection_col , table.table.at(selection_row).size());
+
+		if( do_edit_selected_cell ) {
+			edit_selected_cell( &table.at( selection_row , selection_col ) );
+		}
+
+		int const row_start = 0;
+		int const row_end   = INT_MAX;
+
+		print_table_rows(
+				table
+				,row_start
+				,row_end
+				,selection_row
+				,selection_col
+				);
+
+
+		printw( "\nselection:%d %d\n" , selection_row , selection_col );
+		refresh();
+	}
+
+
+	//printw("\n%s\n" , table.at(0,0).str.c_str()) ;
+	//printw("\n%s\n" , table.at(2,0).str.c_str()) ;
+
 
 	endwin();
 	flushinp();
