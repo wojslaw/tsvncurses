@@ -269,8 +269,10 @@ Cell::parse_as_int(
 		return false;
 	}
 	errno = 0;
-	as_int = strtol(str.c_str(),0,0);
-	if(errno == 0) {
+	char * endptr = 0;
+	as_int = strtol(str.c_str(),&endptr,0);
+	assert(endptr != NULL);
+	if(errno == 0 && (*endptr) == '\0' ) {
 		// I think it wouldn't be logical to signal errors in here, at least for now,
 		// just say it wasn't parsed
 		is_int = true;
@@ -286,8 +288,10 @@ Cell::parse_as_double(void)
 		return false;
 	}
 	errno = 0;
-	as_double = strtod(str.c_str(),0);
-	if(errno == 0) {
+	char * endptr = 0;
+	as_double = strtod(str.c_str(),&endptr);
+	assert(endptr != NULL);
+	if(errno == 0 && (*endptr) == '\0' ) {
 		// I think it wouldn't be logical to signal errors in here, at least for now,
 		// just say it wasn't parsed
 		is_double = true;
@@ -296,6 +300,13 @@ Cell::parse_as_double(void)
 }
 
 
+void
+Cell::parse_all(void)
+{
+	parse_as_int();
+	parse_as_double();
+}
+
 
 
 Cell::Cell(
@@ -303,8 +314,7 @@ Cell::Cell(
 {
 	str = std::string(s);
 	assert(is_cell_proper());
-	parse_as_int();
-	parse_as_double();
+	parse_all();
 }
 
 
@@ -320,5 +330,6 @@ Cell::Cell(
 			,length_of_string  ////size_t n);
 	);
 	assert(is_cell_proper());
+	parse_all();
 }
 

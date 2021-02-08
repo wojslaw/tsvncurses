@@ -43,9 +43,9 @@ struct Cell {
 	bool is_cell_proper(void) const;
 
 	bool parse_as_int() ;
-
-
 	bool parse_as_double() ;
+
+	void parse_all(void);
 
 
 	Cell(const char * s) ;
