@@ -157,6 +157,20 @@ edit_selected_cell(
 
 	wmove(w,0,0);
 	wprintw(w, "%s\n" , cell->str.c_str() );
+	echo();
+	noraw();
+
+	char buffer[0x100] = {0};
+
+
+	wprintw(w, "input new value:\n"  );
+	wgetnstr(w,buffer,0xff);
+
+	cell->str = std::string(buffer);
+	cell->parse_all();
+
+	noecho();
+	raw();
 
 	// TODO
 }
@@ -266,6 +280,14 @@ edit_with_ncurses(Table table)
 		if( do_edit_selected_cell ) {
 			assert(window_edit);
 			edit_selected_cell( window_edit ,  &table.at( selection_row , selection_col ) );
+
+			print_table_rows(
+					table
+					,row_start
+					,row_end
+					,selection_row
+					,selection_col
+					);
 		}
 
 
