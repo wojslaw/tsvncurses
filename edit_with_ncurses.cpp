@@ -7,7 +7,7 @@
 // moving cells ,rows, columns around
 // adding cells,rows, columns
 
-
+int CELLWIDTH = 8;
 
 
 void print_cell(
@@ -43,7 +43,6 @@ print_row(
 		,int const start_x
 		,int const width
 		,bool const is_highlighted
-		,int const selection_col
 		,std::vector<Cell> vec_cells
 	 )
 
@@ -58,10 +57,7 @@ print_row(
 	int col = 0;
 
 	for(Cell cell : vec_cells ) {
-		bool const is_col_highlighted = (
-				is_highlighted
-				);
-		print_cell(display_y,display_x,width,cell,true);
+		print_cell(display_y,display_x,width,cell,is_highlighted);
 		display_x += width;
 		col++;
 	}
@@ -91,20 +87,19 @@ print_table_rows(
 			 0
 			,width
 			,width
-			,-1
-			,-1
+			,false
 			,table.table.at(0) );
 	attroff(A_REVERSE);
 
-	for( int c = 0; c < table.table.at(0).size() ; ++c ) {
+	for( int c = 0; c < (int)table.table.at(0).size() ; ++c ) {
 		
 		mvprintw( 1 , (1+c) * width , "%4d" , c );
 	}
 
-	if(start_row >= table.table.size()) {
+	if(start_row >= (int)table.table.size()) {
 		start_row = table.table.size();
 	}
-	if(end_row >= table.table.size()) {
+	if(end_row >= (int)table.table.size()) {
 		end_row = table.table.size();
 	}
 
@@ -122,7 +117,7 @@ print_table_rows(
 		mvprintw( y , 0 , "%4d" , r );
 
 
-		for( int c = 0 ; c < row.size() ; ++c ) {
+		for( int c = 0 ; c < (int)row.size() ; ++c ) {
 			int const x = (1+c)*width;
 			bool const is_highlighted
 				= (
@@ -216,7 +211,6 @@ edit_with_ncurses(Table table)
 	int selection_col = 1;
 	// TODO selecting and editing out of bounds
 
-	int display_y = 0;
 
 
 	WINDOW * window_edit = newwin(
@@ -291,9 +285,11 @@ edit_with_ncurses(Table table)
 		}
 
 
+
 		refresh();
 		wrefresh(window_edit);
 
+		move( selection_row+2 , (selection_col+1) * CELLWIDTH );
 
 	}
 
