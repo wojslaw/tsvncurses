@@ -1,6 +1,12 @@
 #include "edit_with_ncurses.hpp"
 
 
+// TODO:
+// std::map , from string   to column id with matching header
+// edit cells: s, S
+// moving cells ,rows, columns around
+// adding cells,rows, columns
+
 
 
 
@@ -83,12 +89,17 @@ print_table_rows(
 	attron(A_REVERSE);
 	print_row(
 			 0
-			,0
+			,width
 			,width
 			,-1
 			,-1
 			,table.table.at(0) );
 	attroff(A_REVERSE);
+
+	for( int c = 0; c < table.table.at(0).size() ; ++c ) {
+		
+		mvprintw( 1 , (1+c) * width , "%4d" , c );
+	}
 
 	if(start_row >= table.table.size()) {
 		start_row = table.table.size();
@@ -108,8 +119,11 @@ print_table_rows(
 			return;
 		}
 
+		mvprintw( y , 0 , "%4d" , r );
+
+
 		for( int c = 0 ; c < row.size() ; ++c ) {
-			int const x = c*width;
+			int const x = (1+c)*width;
 			bool const is_highlighted
 				= (
 				(r == selection_row)
@@ -225,6 +239,17 @@ edit_with_ncurses(Table table)
 
 
 		printw( "\nselection:%d %d\n" , selection_row , selection_col );
+
+		Cell cell = table.at(selection_row , selection_col);
+		printw( "%s\n" ,cell.str.c_str());
+		if( cell.is_double ) {
+			printw( "%f\n" ,cell.as_double);
+		}
+		if( cell.is_int ) {
+			printw( "%d\n" ,cell.as_int);
+		}
+
+
 		refresh();
 	}
 
