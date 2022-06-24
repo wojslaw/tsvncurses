@@ -118,6 +118,7 @@ Table::at(
 	return table.at(row).at(col);
 }
 
+
 void Table::fprint(FILE * f) const {
 	for( const auto & row : table ) {
 		for( const auto & cell : row ) {
@@ -184,13 +185,21 @@ Table::Table(
 {
 	//for cutting on tabs: strchr
 	size_t count_rows = 0;
+	size_t count_cols_max = 0;
 	table.reserve(linevec.size());
 	for(std::string line_of_input : linevec) {
 		table.emplace_back(vector_of_cells_from_line_string(line_of_input));
+		if( table.back().size() > count_cols_max) {
+			count_cols_max = table.back().size() ;
+		}
 		++count_rows;
 	}
 
+	cols = count_cols_max;
+	rows = count_rows;
+
 	printf( "Table rows: %zd\n" , count_rows  );
+	printf( "Table cols: %zd\n" , count_cols_max  );
 }
 
 
@@ -201,7 +210,14 @@ Table table_from_file(
 		)
 {
 	LinesVector linevec = lines_from_file(f);
-	return Table(linevec);
+	Table table = Table(linevec);
+	table.map_of_columns = std::map< const char *, int >();
+	for( int i = 0; i < table.cols  ; ++i ) {
+		char * str = 0;
+		int const retval = asprintf(&str , "%s", table.at(0,i).c_str() );
+		assert(retval > 0);
+	}
+	return table;
 }
 
 
@@ -250,14 +266,6 @@ Cell::is_str(
 }
 
 
-const char *
-Cell::as_str(
-		void
-		)
-	const
-{
-	return str.c_str();
-}
 
 
 bool

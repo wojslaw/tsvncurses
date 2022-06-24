@@ -8,11 +8,14 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 
 #define DELIMITER_CELL '\t'
 #define DELIMITER_ROW  '\n'
 
+
+// TODO write table to file
 
 
 typedef std::vector< std::string > LinesVector ;
@@ -26,7 +29,8 @@ void lines_fprint_to_file(FILE * f , const LinesVector larr);
 struct Cell {
 	std::string str;
 	bool is_str(void) const ;
-	const char * as_str(void) const ;
+	const char * c_str(void) const { return str.c_str(); } // TODO use only c_str from these 2
+	const char * as_str(void) const { return str.c_str(); }
 	bool is_int = false;
 	int  as_int = 0;
 	bool   is_double = false;
@@ -63,6 +67,10 @@ struct Cell {
 struct Table {
 	//std::string name; // TODO
 	std::vector< std::vector< Cell > > table;
+	std::map< const char *, int > map_of_columns ;
+
+	int cols = 0;
+	int rows = 0;
 
 	Cell & at(size_t const row , size_t const col) ;
 	void fprint(FILE * f) const ;

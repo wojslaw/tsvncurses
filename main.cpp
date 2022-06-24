@@ -89,8 +89,8 @@ int main(int argc , char *argv[])
 
 
 		printf( "### print:\n" );
-		for( auto const row : vector_table.back().table ) {
-			for( auto const c : row ) {
+		for( auto const & row : vector_table.back().table ) {
+			for( auto const & c : row ) {
 				if(c.is_double) {
 					fprint_double_hexadecimal(stdout, c.as_double );
 				} else {
@@ -100,8 +100,8 @@ int main(int argc , char *argv[])
 			printf("\n");
 		}
 		printf( "### are cells proper?\n" );
-		for( auto const row : vector_table.back().table ) {
-			for( auto const c : row ) {
+		for( auto const & row : vector_table.back().table ) {
+			for( auto const & c : row ) {
 				printf("%d\t" , c.is_cell_proper() );
 			}
 			printf("\n");
